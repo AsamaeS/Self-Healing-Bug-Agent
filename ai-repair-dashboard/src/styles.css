@@ -1,0 +1,165 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-code: var(--code-bg);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Light theme (default) - OpenAI style */
+:root {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --surface: #f9fafb;
+  --surface-elevated: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --primary-hover: #059669;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #0f172a;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #10b981;
+  --code-bg: #f3f4f6;
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Dark theme - OpenAI style */
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --surface: #111111;
+  --surface-elevated: #1a1a1a;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #10b981;
+  --primary-foreground: #000000;
+  --primary-hover: #059669;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1f1f1f;
+  --muted-foreground: #9ca3af;
+  --accent: #262626;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #000000;
+  --success: #10b981;
+  --success-foreground: #000000;
+  --warning: #f59e0b;
+  --warning-foreground: #000000;
+  --info: #3b82f6;
+  --info-foreground: #000000;
+  --border: #262626;
+  --input: #262626;
+  --ring: #10b981;
+  --code-bg: #1f1f1f;
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 4px 16px -4px rgb(0 0 0 / 0.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+  /* Smooth theme transition for surfaces */
+  .card-elevated,
+  .glass,
+  header,
+  button,
+  input,
+  section {
+    transition: background-color 250ms ease, border-color 250ms ease,
+      color 250ms ease, box-shadow 250ms ease;
+  }
+}
+
+@utility glass {
+  background: color-mix(in oklab, var(--surface) 75%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--border);
+}
+
+@utility card-elevated {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
