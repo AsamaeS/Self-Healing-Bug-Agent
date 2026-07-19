@@ -23,7 +23,7 @@ export function LandingFooter() {
           </a>
         </div>
         <div className="text-sm text-muted-foreground">
-          © 2025 OpenAI Hackathon
+          © 2026 OpenAI Hackathon
         </div>
       </div>
     </footer>

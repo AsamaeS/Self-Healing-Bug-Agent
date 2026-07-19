@@ -57,6 +57,8 @@ pytest-temp/
 tmp/
 *.log
 
-# Original Logo
-Logo minimaliste et branding technologique.png
+# Original Logo (temporary source files, not the ones used by the app)
+/Logo minimaliste et branding technologique.png
+/Logo_minimaliste_et_branding_technologique-removebg-preview.png
+/logo.png
 workspaces/

@@ -58,7 +58,7 @@ function Dashboard() {
         </div>
 
         <footer className="mt-12 border-t border-border py-6 text-center text-xs text-muted-foreground">
-          Self-Healing Bug Agent · OpenAI Hackathon 2025
+          Self-Healing Bug Agent · OpenAI Hackathon 2026
         </footer>
       </main>
     </div>
