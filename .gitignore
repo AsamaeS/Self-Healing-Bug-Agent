@@ -56,4 +56,7 @@ test-temp/
 pytest-temp/
 tmp/
 *.log
+
+# Original Logo
+Logo minimaliste et branding technologique.png
 workspaces/

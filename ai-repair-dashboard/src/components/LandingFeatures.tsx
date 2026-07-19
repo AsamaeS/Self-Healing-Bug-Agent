@@ -11,65 +11,65 @@ import {
 const features = [
   {
     title: "Autonomous Patching",
-    description: "AI analyzes issues and generates production-ready code fixes.",
+    description: "AI analyzes issues and generates production-ready code fixes that match your codebase style.",
     icon: Code2,
   },
   {
     title: "Sandbox Verification",
-    description: "Patches are tested in isolated environments before deployment.",
+    description: "Patches are tested in isolated, reproducible environments before reaching your production codebase.",
     icon: ShieldCheck,
   },
   {
     title: "Regression Testing",
-    description: "Automatically adds regression tests to prevent future breaks.",
+    description: "Automatically adds comprehensive regression tests to prevent the same bug from recurring.",
     icon: FlaskConical,
   },
   {
     title: "GitHub Integration",
-    description: "Seamlessly works with your existing GitHub repos and PRs.",
+    description: "Seamlessly connects to your existing GitHub repos and PR workflows, no extra setup required.",
     icon: GitBranch,
   },
   {
     title: "Lightning Fast",
-    description: "End-to-end workflow that runs in minutes, not hours.",
+    description: "End-to-end workflow that runs in minutes, not hours — get your fixes deployed quickly and safely.",
     icon: Zap,
   },
   {
     title: "Verified PRs",
-    description: "Only opens PRs with fully passing test suites.",
+    description: "Our VerificationGate ensures that only patches with fully passing test suites are opened as PRs.",
     icon: GitPullRequest,
   },
 ];
 
 export function LandingFeatures() {
   return (
-    <section id="features" className="bg-background py-20">
+    <section id="features" className="bg-background py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Built for Developers
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Everything you need to fix bugs without lifting a finger.
+          <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
+            A complete, end-to-end solution that takes care of everything from bug detection to verified PRs.
           </p>
         </div>
-        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="rounded-xl border border-border bg-card p-6"
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="group rounded-2xl border border-border bg-card p-8 hover:shadow-lg transition-all duration-300"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
-                <feature.icon className="h-6 w-6 text-primary" />
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-primary group-hover:bg-primary/10 transition-colors duration-300">
+                <feature.icon className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">
+              <h3 className="text-xl font-bold text-foreground mb-3">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-muted-foreground">
+              <p className="text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>
