@@ -1,11 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  GitBranch,
-  Bot,
-  Server,
-  GitPullRequest,
-} from "lucide-react";
+import { ArrowRight, GitBranch, Bot, Server, GitPullRequest } from "lucide-react";
 
 const steps = [
   {
@@ -20,7 +14,8 @@ const steps = [
   },
   {
     title: "Sandbox Verification",
-    description: "Patches are tested in an isolated, reproducible environment with your full test suite.",
+    description:
+      "Patches are tested in an isolated, reproducible environment with your full test suite.",
     icon: Server,
   },
   {
@@ -58,12 +53,8 @@ export function LandingArchitecture() {
               <div className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                 Step {index + 1}
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">
-                {step.title}
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {step.description}
-              </p>
+              <h3 className="text-2xl font-bold text-foreground mb-4">{step.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{step.description}</p>
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute -right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-surface p-2">
                   <ArrowRight className="h-6 w-6 text-muted-foreground" />

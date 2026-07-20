@@ -21,7 +21,7 @@ export function PatchCard() {
           <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
           <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
           <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
-          <span className="ml-3">src/services/user-service.ts</span>
+          <span className="ml-3">calculator.py</span>
         </div>
         <pre className="overflow-x-auto p-0 text-xs leading-6 font-mono">
           {patchDiff.map((line, i) => (

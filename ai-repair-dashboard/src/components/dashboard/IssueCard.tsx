@@ -23,9 +23,7 @@ export function IssueCard() {
         </span>
       </div>
       <h3 className="text-sm font-semibold leading-snug">{issueInfo.title}</h3>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        {issueInfo.description}
-      </p>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{issueInfo.description}</p>
       <div className="mt-4 divide-y divide-border/50">
         <KeyValue label="File Path">
           <span className="font-mono text-xs">{issueInfo.filePath}</span>

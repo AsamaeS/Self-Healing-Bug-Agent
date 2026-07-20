@@ -28,13 +28,12 @@ export function LandingHero() {
             Self-Healing Bug Agent
           </h1>
           <p className="max-w-3xl text-balance text-xl text-muted-foreground leading-relaxed">
-            Autonomously detect, fix, test, and deploy verified patches to your GitHub repositories — powered by cutting-edge AI.
+            Autonomously detect, fix, test, and deploy verified patches to your GitHub repositories
+            — powered by cutting-edge AI.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" className="h-12 px-8 text-base" asChild>
-              <Link to="/dashboard">
-                Get Started
-              </Link>
+              <Link to="/dashboard">Get Started</Link>
             </Button>
             <Button size="lg" variant="secondary" className="h-12 px-8 text-base gap-2" asChild>
               <a href="#">
@@ -71,13 +70,17 @@ export function LandingHero() {
                 [INFO] Listening for GitHub issues labeled "agent-fix"
               </p>
               <p>
-                <span className="text-blue-400">→</span> New issue detected: <span className="text-white">TypeError in user-service.ts: Cannot read property 'name' of undefined</span>
+                <span className="text-blue-400">→</span> New issue detected:{" "}
+                <span className="text-white">
+                  TypeError in user-service.ts: Cannot read property 'name' of undefined
+                </span>
               </p>
               <p>
                 <span className="text-yellow-400">⏳</span> Generating patch with GPT-4o…
               </p>
               <p>
-                <span className="text-cyan-400">✓</span> Patch generated: <span className="text-white">user-service.ts#L42</span>
+                <span className="text-cyan-400">✓</span> Patch generated:{" "}
+                <span className="text-white">user-service.ts#L42</span>
               </p>
               <p>
                 <span className="text-cyan-400">✓</span> Running test suite in sandbox…
@@ -86,7 +89,8 @@ export function LandingHero() {
                 <span className="text-green-400">✓</span> All tests passing!
               </p>
               <p>
-                <span className="text-green-400">✓</span> PR created: <span className="text-white">#483 - Fix undefined user.name</span>
+                <span className="text-green-400">✓</span> PR created:{" "}
+                <span className="text-white">#483 - Fix undefined user.name</span>
               </p>
             </div>
           </div>

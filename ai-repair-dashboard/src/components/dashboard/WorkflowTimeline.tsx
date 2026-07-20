@@ -16,12 +16,9 @@ export function WorkflowTimeline() {
                 <div
                   className={cn(
                     "grid h-7 w-7 place-items-center rounded-full border transition-colors",
-                    step.status === "done" &&
-                      "border-success/40 bg-success/15 text-success",
-                    step.status === "active" &&
-                      "border-primary/40 bg-primary/15 text-primary",
-                    step.status === "pending" &&
-                      "border-border bg-muted text-muted-foreground",
+                    step.status === "done" && "border-success/40 bg-success/15 text-success",
+                    step.status === "active" && "border-primary/40 bg-primary/15 text-primary",
+                    step.status === "pending" && "border-border bg-muted text-muted-foreground",
                   )}
                 >
                   {step.status === "done" ? (

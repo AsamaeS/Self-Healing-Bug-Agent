@@ -6,7 +6,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 
 export function TopNav() {
   const location = useLocation();
-  
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-4 px-6">
@@ -24,19 +24,23 @@ export function TopNav() {
 
         <div className="mx-4 hidden h-6 w-px bg-border md:block" />
         <nav className="hidden items-center gap-4 md:flex">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              location.pathname === "/" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              location.pathname === "/"
+                ? "bg-secondary text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             }`}
           >
             <Home className="h-4 w-4" />
             Home
           </Link>
-          <Link 
-            to="/dashboard" 
+          <Link
+            to="/dashboard"
             className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              location.pathname === "/dashboard" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              location.pathname === "/dashboard"
+                ? "bg-secondary text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             }`}
           >
             <LayoutDashboard className="h-4 w-4" />

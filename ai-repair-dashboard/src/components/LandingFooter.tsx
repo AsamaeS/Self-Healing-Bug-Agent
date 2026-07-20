@@ -10,8 +10,12 @@ export function LandingFooter() {
           <span className="font-semibold text-foreground">Self-Healing Bug Agent</span>
         </div>
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">Home</Link>
-          <Link to="/dashboard" className="hover:text-foreground">Dashboard</Link>
+          <Link to="/" className="hover:text-foreground">
+            Home
+          </Link>
+          <Link to="/dashboard" className="hover:text-foreground">
+            Dashboard
+          </Link>
           <a
             href="https://github.com/AsamaeS/Self-Healing-Bug-Agent"
             target="_blank"
@@ -22,9 +26,7 @@ export function LandingFooter() {
             GitHub
           </a>
         </div>
-        <div className="text-sm text-muted-foreground">
-          © 2026 OpenAI Hackathon
-        </div>
+        <div className="text-sm text-muted-foreground">© 2026 OpenAI Hackathon</div>
       </div>
     </footer>
   );

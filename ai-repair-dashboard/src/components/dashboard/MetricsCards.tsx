@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  Zap,
-  Bot,
-  Server,
-  Target,
-  RotateCw,
-  GitPullRequest,
-} from "lucide-react";
+import { Zap, Bot, Server, Target, RotateCw, GitPullRequest } from "lucide-react";
 import { metrics } from "@/lib/dashboard-data";
 import { cn } from "@/lib/utils";
 
@@ -39,15 +32,8 @@ const MetricCard = ({
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-            {title}
-          </p>
-          <p
-            className={cn(
-              "text-xl font-semibold tracking-tight",
-              status && statusStyles[status]
-            )}
-          >
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{title}</p>
+          <p className={cn("text-xl font-semibold tracking-tight", status && statusStyles[status])}>
             {value}
           </p>
         </div>
@@ -90,12 +76,7 @@ export function MetricsCards() {
         status="success"
         delay={0.2}
       />
-      <MetricCard
-        title="Retry Counter"
-        value={metrics.retryCounter}
-        icon={RotateCw}
-        delay={0.25}
-      />
+      <MetricCard title="Retry Counter" value={metrics.retryCounter} icon={RotateCw} delay={0.25} />
       <MetricCard
         title="Pull Request"
         value={metrics.pullRequestStatus}
