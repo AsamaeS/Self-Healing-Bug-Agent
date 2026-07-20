@@ -64,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         repair_agent=repair_agent,
         regression_test_writer=regression_test_writer,
         test_runner=test_runner,
+        verifier=test_runner,
         pr_publisher=pr_publisher,
     )
     
@@ -148,4 +149,3 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 
 app = create_app()
-

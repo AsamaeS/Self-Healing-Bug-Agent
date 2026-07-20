@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import subprocess
 import sys
 
@@ -18,13 +19,31 @@ class MockReproducer:
     async def reproduce(
         self, run: RepairRun, workspace: Workspace
     ) -> ReproductionResult:
-        """Attempt to reproduce the failure by running tests."""
-        
-        # For demo purposes, simulate a failure to allow the workflow to continue
-        # In production, this would actually run the failing test
+        """Reproduce the demo bug by executing the checked-out code."""
+
+        command = [
+            sys.executable,
+            "-c",
+            (
+                "from calculator import divide\n"
+                "try:\n"
+                "    divide(10, 0)\n"
+                "except ValueError:\n"
+                "    pass\n"
+                "else:\n"
+                "    raise AssertionError('expected ValueError')\n"
+            ),
+        ]
+        completed = await asyncio.to_thread(
+            subprocess.run,
+            command,
+            cwd=workspace.path,
+            capture_output=True,
+            text=True,
+        )
         return ReproductionResult(
-            reproduced=True,  # Simulate successful reproduction
-            command=f"{sys.executable} -m pytest -v",
-            exit_code=1,  # Simulate test failure
-            output="Simulated test failure for demo purposes\n\nFAILED test_calculator.py::test_divide_by_zero - AssertionError: Expected ZeroDivisionError but no exception was raised",
+            reproduced=completed.returncode != 0,
+            command=" ".join(command[:2]) + " <reproduction-script>",
+            exit_code=completed.returncode,
+            output=(completed.stdout + completed.stderr).strip(),
         )

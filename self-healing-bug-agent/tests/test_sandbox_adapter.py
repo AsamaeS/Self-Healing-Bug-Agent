@@ -8,6 +8,7 @@ import pytest
 from healing_agent.models import RepairRun, TriggerType
 from healing_agent.modules.contracts import (
     PatchResult,
+    RegressionTestFile,
     RegressionTestResult,
     ReproductionResult,
     Workspace,
@@ -39,6 +40,7 @@ class FakeSandboxVerifier:
             number=1,
             status=self.status,
             patch_applied=True,
+            regression_failed_before_patch=True,
             test_results=(),
             logs=(
                 VerificationLog(
@@ -108,7 +110,12 @@ def sample_workspace(tmp_path):
 def sample_test_result():
     """Create a sample regression test result."""
     return RegressionTestResult(
-        test_files=["tests/test_bug.py"],
+        test_files=[
+            RegressionTestFile(
+                path="tests/test_bug.py",
+                content="def test_example(): assert True\n",
+            )
+        ],
         failed_before_fix=False,
         command="pytest",
     )
@@ -130,6 +137,11 @@ def sample_patch():
     """Create a sample patch result."""
     return PatchResult(
         changed_files=["src/main.py"],
+        unified_diff=(
+            "--- a/calculator.py\n+++ b/calculator.py\n"
+            "@@ -1 +1 @@\n-def add(a, b): return a + b\n"
+            "+def add(a, b): return a - b\n"
+        ),
         summary="Fixed the bug",
     )
 
@@ -147,11 +159,16 @@ class TestSandboxTestRunnerAdapter:
         # Check that adapter has the required methods
         assert hasattr(adapter, "run_targeted")
         assert hasattr(adapter, "run_full_suite")
-        assert hasattr(adapter, "build_verification_report")
+        assert hasattr(adapter, "verify")
 
     @pytest.mark.asyncio
     async def test_run_targeted_returns_test_command_result(
-        self, adapter_with_fake_verifier, sample_run, sample_workspace, sample_test_result
+        self,
+        adapter_with_fake_verifier,
+        sample_run,
+        sample_workspace,
+        sample_test_result,
+        sample_patch,
     ):
         """Test that run_targeted returns a TestCommandResult."""
         adapter, fake_verifier = adapter_with_fake_verifier
@@ -161,7 +178,9 @@ class TestSandboxTestRunnerAdapter:
         test_file.parent.mkdir(parents=True, exist_ok=True)
         test_file.write_text("def test_example(): assert True")
 
-        result = await adapter.run_targeted(sample_run, sample_workspace, sample_test_result)
+        result = await adapter.run_targeted(
+            sample_run, sample_workspace, sample_patch, sample_test_result
+        )
 
         # Verify result structure
         assert result.command == "pytest"
@@ -170,7 +189,7 @@ class TestSandboxTestRunnerAdapter:
 
     @pytest.mark.asyncio
     async def test_run_full_suite_uses_cached_results(
-        self, adapter_with_fake_verifier, sample_run, sample_workspace, sample_test_result
+        self, adapter_with_fake_verifier, sample_run, sample_workspace, sample_test_result, sample_patch
     ):
         """Test that run_full_suite returns cached results from run_targeted."""
         adapter, _ = adapter_with_fake_verifier
@@ -181,7 +200,7 @@ class TestSandboxTestRunnerAdapter:
         test_file.write_text("def test_example(): assert True")
 
         # First call run_targeted (this populates cache)
-        await adapter.run_targeted(sample_run, sample_workspace, sample_test_result)
+        await adapter.run_targeted(sample_run, sample_workspace, sample_patch, sample_test_result)
 
         # Then call run_full_suite (should use cache)
         result = await adapter.run_full_suite(sample_run, sample_workspace)
@@ -209,11 +228,13 @@ class TestSandboxTestRunnerAdapter:
         test_file.write_text("def test_example(): assert True")
 
         # Run verification to populate cache
-        targeted = await adapter.run_targeted(sample_run, sample_workspace, sample_test_result)
+        targeted = await adapter.run_targeted(
+            sample_run, sample_workspace, sample_patch, sample_test_result
+        )
         full_suite = await adapter.run_full_suite(sample_run, sample_workspace)
 
         # Build verification report
-        report = await adapter.build_verification_report(
+        report = await adapter.verify(
             sample_run,
             sample_workspace,
             sample_reproduction,
@@ -241,7 +262,7 @@ class TestSandboxTestRunnerAdapter:
 
     @pytest.mark.asyncio
     async def test_adapter_handles_verification_failure(
-        self, sample_run, sample_workspace, sample_test_result
+        self, sample_run, sample_workspace, sample_test_result, sample_patch
     ):
         """Test that adapter correctly handles Module 3 verification failures."""
         # Create adapter with failing verifier
@@ -254,7 +275,9 @@ class TestSandboxTestRunnerAdapter:
         test_file.write_text("def test_example(): assert True")
 
         # Run targeted test
-        result = await adapter.run_targeted(sample_run, sample_workspace, sample_test_result)
+        result = await adapter.run_targeted(
+            sample_run, sample_workspace, sample_patch, sample_test_result
+        )
 
         # Verify failure is reflected
         assert result.passed == False
@@ -278,7 +301,9 @@ class TestSandboxTestRunnerAdapter:
         test_file.write_text("def test_example(): assert True")
 
         # Run full cycle
-        targeted = await adapter.run_targeted(sample_run, sample_workspace, sample_test_result)
+        targeted = await adapter.run_targeted(
+            sample_run, sample_workspace, sample_patch, sample_test_result
+        )
         full_suite = await adapter.run_full_suite(sample_run, sample_workspace)
 
         # Verify cache exists
@@ -286,7 +311,7 @@ class TestSandboxTestRunnerAdapter:
         assert cache_key in adapter._verification_cache
 
         # Build report (should clean cache)
-        await adapter.build_verification_report(
+        await adapter.verify(
             sample_run,
             sample_workspace,
             sample_reproduction,

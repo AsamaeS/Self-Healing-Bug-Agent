@@ -52,6 +52,7 @@ def test_verifier_applies_patch_runs_test_and_preserves_source(tmp_path: Path) -
 
     assert report.status is VerificationStatus.VERIFIED
     assert report.attempts[0].patch_applied is True
+    assert report.attempts[0].regression_failed_before_patch is True
     assert report.attempts[0].test_results[-1].succeeded is True
     assert (repository / "calculator.py").read_text(encoding="utf-8") == "def answer(): return 1\n"
     assert report.to_dict()["status"] == "verified"
@@ -79,3 +80,20 @@ def test_failed_test_suite_returns_max_retry_status(tmp_path: Path) -> None:
     assert report.status is VerificationStatus.FAILED_MAX_RETRY
     assert len(report.attempts) == 2
     assert all(attempt.patch_applied for attempt in report.attempts)
+
+
+def test_regression_test_that_passes_before_patch_is_rejected(tmp_path: Path) -> None:
+    repository = _repository(tmp_path)
+    meaningless_test = GeneratedTest(
+        relative_path=Path("tests/test_meaningless.py"),
+        content="def test_meaningless():\n    assert True\n",
+    )
+
+    report = SandboxVerifier().verify(
+        _request(repository, regression_tests=[meaningless_test])
+    )
+
+    assert report.status is VerificationStatus.FAILED
+    assert report.attempts[0].patch_applied is False
+    assert report.attempts[0].regression_failed_before_patch is False
+    assert report.attempts[0].retryable is False

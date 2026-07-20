@@ -101,12 +101,11 @@ class RepairAgentAdapter:
             run.iteration,
         )
         
-        # Apply the patch to the workspace
-        self._apply_patch_to_workspace(workspace.path, patch_proposal.diff)
-        
-        # Convert to orchestrator PatchResult
+        # The repair module proposes a diff only. The verifier applies it in a fresh
+        # disposable copy so the source workspace remains a pristine baseline.
         return PatchResult(
             changed_files=patch_proposal.files_touched,
+            unified_diff=patch_proposal.diff,
             summary=patch_proposal.explanation,
         )
 
@@ -140,29 +139,3 @@ class RepairAgentAdapter:
         if verification and not verification.passed:
             return "Previous attempt failed verification"
         return None
-
-    def _apply_patch_to_workspace(self, workspace_path: Path, diff: str) -> None:
-        """Apply a patch diff to the workspace using git apply."""
-        import subprocess
-        
-        try:
-            # Write diff to temporary file
-            diff_path = workspace_path / "patch.diff"
-            diff_path.write_text(diff)
-            
-            # Apply the patch
-            result = subprocess.run(
-                ["git", "apply", str(diff_path)],
-                cwd=workspace_path,
-                capture_output=True,
-                text=True,
-            )
-            
-            if result.returncode != 0:
-                # If git apply fails, try manual patch application
-                # For demo, we'll just note the failure
-                pass
-                
-        except Exception as e:
-            # Log error but don't fail - this is a demo
-            pass

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+import shutil
 import sys
 from typing import Sequence
 
@@ -88,20 +89,76 @@ class SandboxVerifier:
                         message="Created isolated repository workspace.",
                     )
                 )
-                patch_results = self._apply_patch(workspace.path, request.patch_diff)
-                results.extend(patch_results)
-                logs.append(
-                    VerificationLog(
-                        stage="patch",
-                        message="Patch applied successfully.",
-                    )
-                )
                 test_paths = write_generated_tests(workspace.path, request.regression_tests)
+                resolved_workspace = workspace.path.resolve()
+                relative_test_paths = tuple(
+                    path.resolve().relative_to(resolved_workspace) for path in test_paths
+                )
                 logs.append(
                     VerificationLog(
                         stage="regression_test",
                         message=f"Wrote {len(test_paths)} generated regression test file(s).",
-                        metadata={"paths": [str(path.relative_to(workspace.path)) for path in test_paths]},
+                        metadata={"paths": [str(path) for path in relative_test_paths]},
+                    )
+                )
+                regression_command = Command(
+                    argv=(
+                        sys.executable,
+                        "-m",
+                        "pytest",
+                        *(
+                            str(path) for path in relative_test_paths
+                        ),
+                    )
+                )
+                logs.append(
+                    VerificationLog(
+                        stage="regression_pre_patch",
+                        message=(
+                            "Running generated regression test against original code: "
+                            f"{command_display(regression_command.argv)}"
+                        ),
+                    )
+                )
+                pre_patch_result = self._executor.run(
+                    regression_command, workspace_path=workspace.path
+                )
+                results.append(pre_patch_result)
+                if pre_patch_result.succeeded:
+                    logs.append(
+                        VerificationLog(
+                            stage="regression_pre_patch",
+                            message=(
+                                "Generated regression test passed before the patch and "
+                                "therefore does not prove the reported bug."
+                            ),
+                            level=LogLevel.ERROR,
+                        )
+                    )
+                    return VerificationAttempt(
+                        number=number,
+                        status=VerificationStatus.FAILED,
+                        patch_applied=False,
+                        regression_failed_before_patch=False,
+                        test_results=tuple(results),
+                        logs=tuple(logs),
+                        error="Regression test did not fail before the patch.",
+                        retryable=False,
+                    )
+
+                logs.append(
+                    VerificationLog(
+                        stage="regression_pre_patch",
+                        message="Generated regression test failed before the patch as required.",
+                    )
+                )
+                patch_results = self._apply_patch(workspace.path, request.patch_diff)
+                results.extend(patch_results)
+                self._remove_python_bytecode(workspace.path)
+                logs.append(
+                    VerificationLog(
+                        stage="patch",
+                        message="Patch applied successfully.",
                     )
                 )
                 test_command = request.test_command or Command(
@@ -127,6 +184,7 @@ class SandboxVerifier:
                         number=number,
                         status=VerificationStatus.VERIFIED,
                         patch_applied=True,
+                        regression_failed_before_patch=True,
                         test_results=tuple(results),
                         logs=tuple(logs),
                         retryable=False,
@@ -148,6 +206,7 @@ class SandboxVerifier:
                     number=number,
                     status=VerificationStatus.FAILED,
                     patch_applied=True,
+                    regression_failed_before_patch=True,
                     test_results=tuple(results),
                     logs=tuple(logs),
                     error="Test suite did not pass.",
@@ -182,6 +241,16 @@ class SandboxVerifier:
         return tuple(results)
 
     @staticmethod
+    def _remove_python_bytecode(workspace_path: Path) -> None:
+        """Prevent pre-patch imports from masking same-size, same-second edits."""
+
+        for cache_dir in workspace_path.rglob("__pycache__"):
+            if cache_dir.is_dir():
+                shutil.rmtree(cache_dir, ignore_errors=True)
+        for bytecode_file in workspace_path.rglob("*.pyc"):
+            bytecode_file.unlink(missing_ok=True)
+
+    @staticmethod
     def _failure_attempt(
         number: int,
         logs: list[VerificationLog],
@@ -202,6 +271,7 @@ class SandboxVerifier:
             number=number,
             status=VerificationStatus.FAILED,
             patch_applied=patch_applied,
+            regression_failed_before_patch=False,
             test_results=tuple(results),
             logs=tuple(logs),
             error=str(error),

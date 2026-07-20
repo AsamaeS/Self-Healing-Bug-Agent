@@ -28,11 +28,17 @@ class Diagnosis(BaseModel):
 
 class PatchResult(BaseModel):
     changed_files: list[str] = Field(default_factory=list)
+    unified_diff: str = ""
     summary: str = ""
 
 
+class RegressionTestFile(BaseModel):
+    path: str = Field(min_length=1)
+    content: str = Field(min_length=1)
+
+
 class RegressionTestResult(BaseModel):
-    test_files: list[str] = Field(default_factory=list)
+    test_files: list[RegressionTestFile] = Field(default_factory=list)
     failed_before_fix: bool = False
     command: str = ""
 
@@ -85,14 +91,20 @@ class RegressionTestWriter(Protocol):
 
 class TestRunner(Protocol):
     async def run_targeted(
-        self, run: RepairRun, workspace: Workspace, test: RegressionTestResult
+        self,
+        run: RepairRun,
+        workspace: Workspace,
+        patch: PatchResult,
+        test: RegressionTestResult,
     ) -> TestCommandResult: ...
 
     async def run_full_suite(
         self, run: RepairRun, workspace: Workspace
     ) -> TestCommandResult: ...
 
-    async def build_verification_report(
+
+class Verifier(Protocol):
+    async def verify(
         self,
         run: RepairRun,
         workspace: Workspace,
@@ -117,4 +129,5 @@ class OrchestrationModules:
     repair_agent: RepairAgent
     regression_test_writer: RegressionTestWriter
     test_runner: TestRunner
+    verifier: Verifier
     pr_publisher: PullRequestPublisher

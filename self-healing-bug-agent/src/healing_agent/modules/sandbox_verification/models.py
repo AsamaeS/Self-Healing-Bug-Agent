@@ -125,6 +125,7 @@ class VerificationAttempt:
     number: int
     status: VerificationStatus
     patch_applied: bool
+    regression_failed_before_patch: bool = False
     test_results: Sequence[ExecutionResult] = field(default_factory=tuple)
     logs: Sequence[VerificationLog] = field(default_factory=tuple)
     error: str | None = None

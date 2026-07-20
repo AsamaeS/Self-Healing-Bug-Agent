@@ -10,7 +10,7 @@ Respond ONLY with a JSON object in this exact shape, nothing else:
 {
   "file_path": "path/to/test_file.py",
   "test_name": "test_descriptive_name",
-  "test_code": "the full test function, ready to insert"
+  "test_code": "the complete test file, including imports, ready to write"
 }"""
 
 TEST_USER_TEMPLATE = """Diagnosis:
