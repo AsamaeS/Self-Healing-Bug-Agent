@@ -6,8 +6,8 @@ either the orchestrator workflow or Module 3's public API.
 
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+import shlex
 from typing import TYPE_CHECKING
 
 from healing_agent.models import RepairRun, VerificationReport as OrchestratorVerificationReport
@@ -42,7 +42,11 @@ class SandboxTestRunnerAdapter:
         self._verification_cache: dict[str, SandboxVerificationReport] = {}
 
     async def run_targeted(
-        self, run: RepairRun, workspace: Workspace, test: RegressionTestResult
+        self,
+        run: RepairRun,
+        workspace: Workspace,
+        patch: PatchResult,
+        test: RegressionTestResult,
     ) -> TestCommandResult:
         """Run targeted regression tests by delegating to SandboxVerifier.
         
@@ -50,7 +54,7 @@ class SandboxTestRunnerAdapter:
         and cache the results for later method calls.
         """
         # Build verification request from orchestrator data
-        request = self._build_verification_request(workspace, test, run)
+        request = self._build_verification_request(workspace, patch, test, run)
         
         # Execute full verification (patch + test)
         sandbox_report = await self._verifier.verify_async(request)
@@ -85,7 +89,7 @@ class SandboxTestRunnerAdapter:
         # Return the same test results - Module 3 already ran the full suite
         return self._convert_to_test_result(sandbox_report, "pytest")
 
-    async def build_verification_report(
+    async def verify(
         self,
         run: RepairRun,
         workspace: Workspace,
@@ -118,7 +122,10 @@ class SandboxTestRunnerAdapter:
             original_failure_reproduced=reproduction.reproduced,
             patch_present=bool(patch.changed_files),
             regression_test_added=bool(regression_test.test_files),
-            regression_test_failed_before_fix=regression_test.failed_before_fix,
+            regression_test_failed_before_fix=any(
+                attempt.regression_failed_before_patch
+                for attempt in sandbox_report.attempts
+            ),
             targeted_tests_passed=targeted.passed,
             full_suite_passed=full_suite.passed,
             forbidden_changes_detected=False,  # Module 3 doesn't check this
@@ -133,71 +140,36 @@ class SandboxTestRunnerAdapter:
         return orchestrator_report
 
     def _build_verification_request(
-        self, workspace: Workspace, test: RegressionTestResult, run: RepairRun
+        self,
+        workspace: Workspace,
+        patch: PatchResult,
+        test: RegressionTestResult,
+        run: RepairRun,
     ) -> VerificationRequest:
         """Build Module 3's VerificationRequest from orchestrator data.
         
-        Note: This requires the orchestrator to preserve the patch diff in PatchResult
-        and full test file content in RegressionTestResult.
+        Patch and test artifacts come from the contracts, not mutable workspace state.
         """
-        # Extract patch diff from workspace git state
-        # For now, we'll need to read this from the workspace's git diff
-        # This is a limitation: PatchResult doesn't include the diff content
-        
-        # Build regression tests from test result
-        regression_tests = []
-        for test_file in test.test_files:
-            # Read test file content from workspace
-            test_path = workspace.path / test_file
-            if test_path.exists():
-                content = test_path.read_text()
-                regression_tests.append(
-                    GeneratedTest(
-                        relative_path=Path(test_file),
-                        content=content,
-                    )
-                )
+        regression_tests = [
+            GeneratedTest(relative_path=test_file.path, content=test_file.content)
+            for test_file in test.test_files
+        ]
         
         # Build test command
         test_command = Command(
-            argv=tuple(test.command.split()) if test.command else (sys.executable, "-m", "pytest"),
+            argv=tuple(shlex.split(test.command))
+            if test.command
+            else (sys.executable, "-m", "pytest"),
             timeout_seconds=300.0,
         )
         
         return VerificationRequest(
             repository_path=workspace.path,
-            patch_diff=self._get_patch_diff_from_workspace(workspace.path),
+            patch_diff=patch.unified_diff,
             regression_tests=tuple(regression_tests),
             test_command=test_command,
             max_attempts=3,  # Use orchestrator's max_iterations
         )
-
-    def _get_patch_diff_from_workspace(self, workspace_path: Path) -> str:
-        """Extract the current patch diff from the workspace's git state.
-        
-        This is a workaround because PatchResult doesn't preserve the diff.
-        """
-        import subprocess
-        
-        result = subprocess.run(
-            ["git", "diff", "HEAD"],
-            cwd=workspace_path,
-            capture_output=True,
-            text=True,
-        )
-        
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout
-        
-        # Fallback: if no diff in HEAD, try unstaged changes
-        result = subprocess.run(
-            ["git", "diff"],
-            cwd=workspace_path,
-            capture_output=True,
-            text=True,
-        )
-        
-        return result.stdout if result.returncode == 0 else ""
 
     def _convert_to_test_result(
         self, sandbox_report: SandboxVerificationReport, command: str
@@ -211,7 +183,7 @@ class SandboxTestRunnerAdapter:
             return TestCommandResult(
                 command=command or " ".join(last_test.command),
                 passed=sandbox_report.status == VerificationStatus.VERIFIED,
-                exit_code=last_test.exit_code or 1,
+                exit_code=1 if last_test.exit_code is None else last_test.exit_code,
                 output=f"{last_test.stdout}\n{last_test.stderr}".strip(),
             )
         

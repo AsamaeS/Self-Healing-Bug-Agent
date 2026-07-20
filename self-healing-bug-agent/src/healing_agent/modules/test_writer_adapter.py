@@ -8,6 +8,7 @@ import asyncio
 from healing_agent.models import RepairRun
 from healing_agent.modules.contracts import (
     PatchResult,
+    RegressionTestFile,
     RegressionTestResult,
     ReproductionResult,
     Workspace,
@@ -65,7 +66,7 @@ class RegressionTestWriterAdapter:
         
         # Build PatchProposal from PatchResult
         patch_proposal = PatchProposal(
-            diff=self._get_patch_diff_from_workspace(workspace.path),
+            diff=patch.unified_diff,
             files_touched=patch.changed_files,
             explanation=patch.summary,
         )
@@ -82,18 +83,17 @@ class RegressionTestWriterAdapter:
             existing_test_sample,
         )
         
-        # Write the generated test file(s) to workspace
-        test_files = []
-        for test_file in test_proposal.test_files:
-            test_path = workspace.path / test_file.path
-            test_path.parent.mkdir(parents=True, exist_ok=True)
-            test_path.write_text(test_file.content)
-            test_files.append(str(test_file.path))
-        
+        # Return a complete test artifact. Module 3 writes it only inside its fresh
+        # verification sandbox, preserving the source workspace as the pre-fix baseline.
         return RegressionTestResult(
-            test_files=test_files,
-            failed_before_fix=True,  # Assume test would fail before fix
-            command="pytest",
+            test_files=[
+                RegressionTestFile(
+                    path=test_proposal.file_path,
+                    content=test_proposal.test_code,
+                )
+            ],
+            failed_before_fix=False,
+            command="",
         )
 
     def _extract_relevant_files(self, workspace_path: Path) -> dict[str, str]:
@@ -115,24 +115,6 @@ class RegressionTestWriterAdapter:
             relevant_files["example.py"] = "# Example file\n"
         
         return relevant_files
-
-    def _get_patch_diff_from_workspace(self, workspace_path: Path) -> str:
-        """Extract the current patch diff from the workspace's git state."""
-        import subprocess
-        
-        try:
-            result = subprocess.run(
-                ["git", "diff", "HEAD"],
-                cwd=workspace_path,
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0 and result.stdout.strip():
-                return result.stdout
-        except Exception:
-            pass
-        
-        return ""
 
     def _get_existing_test_sample(self, workspace_path: Path) -> str:
         """Get a sample existing test file for context."""

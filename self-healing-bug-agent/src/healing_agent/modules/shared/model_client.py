@@ -76,38 +76,37 @@ class ModelClient:
     
     def _mock_call(self, system_prompt: str, user_prompt: str) -> ModelResponse:
         """Mock response for demo purposes when no API key is provided."""
-        # Return mock responses based on the system prompt
-        # Check for fix/patch first since they're more specific
-        if "fix" in system_prompt.lower() or "patch" in system_prompt.lower():
+        # Route by the declared JSON schema, not loose words such as "fix" or
+        # "patch" that appear in diagnosis and regression-test instructions.
+        if '"files_touched"' in system_prompt:
             mock_response = {
-                "diff": """--- a/calculator.py
+                "diff": """diff --git a/calculator.py b/calculator.py
+--- a/calculator.py
 +++ b/calculator.py
-@@ -4,5 +4,7 @@ def add(a, b):
+@@ -3,4 +3,6 @@ def add(a, b):
      return a + b
 
  def divide(a, b):
 +    if b == 0:
 +        raise ValueError("Cannot divide by zero")
-     return a / b""",
+     return a / b  # Bug: no division by zero check
+""",
                 "files_touched": ["calculator.py"],
                 "explanation": "Added zero divisor check to prevent division by zero error"
             }
-        elif "test" in system_prompt.lower():
+        elif '"test_code"' in system_prompt:
             mock_response = {
-                "test_files": [
-                    {
-                        "path": "test_calculator_division_fix.py",
-                        "content": """import pytest
+                "file_path": "test_calculator_division_fix.py",
+                "test_name": "test_divide_by_zero_raises_error",
+                "test_code": """import pytest
 from calculator import divide
 
 def test_divide_by_zero_raises_error():
     with pytest.raises(ValueError):
         divide(10, 0)
-"""
-                    }
-                ]
+""",
             }
-        elif "diagnose" in system_prompt.lower():
+        elif '"root_cause"' in system_prompt:
             mock_response = {
                 "root_cause": "Division by zero not handled in calculator.py divide function",
                 "file_and_line": "calculator.py:7",
@@ -115,19 +114,7 @@ def test_divide_by_zero_raises_error():
                 "suggested_approach": "Add a check for zero divisor before performing division"
             }
         else:
-            mock_response = {
-                "diff": """--- a/calculator.py
-+++ b/calculator.py
-@@ -4,5 +4,7 @@ def add(a, b):
-     return a + b
-
- def divide(a, b):
-+    if b == 0:
-+        raise ValueError("Cannot divide by zero")
-     return a / b""",
-                "files_touched": ["calculator.py"],
-                "explanation": "Added zero divisor check to prevent division by zero error"
-            }
+            raise ValueError("Unsupported mock prompt schema")
         
         return ModelResponse(
             raw_text=json.dumps(mock_response),

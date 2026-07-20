@@ -26,9 +26,10 @@ export function PullRequestCard() {
     >
       <div className="space-y-4">
         <div>
-          <h4 className="text-sm font-medium">Fix: Handle undefined user.name</h4>
+          <h4 className="text-sm font-medium">Fix: Normalize divide-by-zero error</h4>
           <p className="text-xs text-muted-foreground mt-1">
-            This PR addresses the null reference error by adding optional chaining and a fallback value.
+            This PR raises the documented ValueError and adds a regression test that fails on the
+            original code.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -36,7 +37,7 @@ export function PullRequestCard() {
             <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
               Branch
             </span>
-            <p className="text-sm font-mono mt-1">fix/user-name-undefined</p>
+            <p className="text-sm font-mono mt-1">repair/calculator-value-error</p>
           </div>
           <div className="rounded-lg border border-border p-3">
             <span className="text-[11px] uppercase tracking-wider text-muted-foreground">

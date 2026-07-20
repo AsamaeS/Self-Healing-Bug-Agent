@@ -67,7 +67,7 @@ class ClosedLoopOrchestrator:
                     "Running targeted regression tests",
                 )
                 targeted = await self.modules.test_runner.run_targeted(
-                    run, workspace, regression_test
+                    run, workspace, patch, regression_test
                 )
                 if not targeted.passed:
                     if run.iteration >= run.max_iterations:
@@ -89,7 +89,7 @@ class ClosedLoopOrchestrator:
                 )
                 full_suite = await self.modules.test_runner.run_full_suite(run, workspace)
                 run.verification = (
-                    await self.modules.test_runner.build_verification_report(
+                    await self.modules.verifier.verify(
                         run,
                         workspace,
                         reproduction,

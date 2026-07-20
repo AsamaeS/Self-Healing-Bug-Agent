@@ -12,9 +12,7 @@ export function VerificationCard() {
             key={v.label}
             className={cn(
               "rounded-lg border p-3 transition-colors",
-              v.ok
-                ? "border-success/25 bg-success/5"
-                : "border-destructive/25 bg-destructive/5",
+              v.ok ? "border-success/25 bg-success/5" : "border-destructive/25 bg-destructive/5",
             )}
           >
             <div className="flex items-center justify-between">
