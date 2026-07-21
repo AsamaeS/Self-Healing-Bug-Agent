@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/openAI.png" alt="Self-Healing Bug Agent" width="120" height="120">
+  <img src="https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=minimalist%20tech%20logo%20for%20self-healing%20bug%20agent%2C%20black%20and%20white&image_size=square" alt="Self-Healing Bug Agent" width="120" height="120">
   <h1>Self-Healing Bug Agent</h1>
   <p><strong>Autonomous bug detection, repair, and verification for GitHub repositories</strong></p>
   <p>
@@ -19,7 +19,7 @@
 The Self-Healing Bug Agent is a closed-loop backend that receives a bug report or failed GitHub Actions run, reproduces the failure in a workspace, iterates on a fix, adds a regression test, runs targeted and full verification, and only then allows a pull request to open.
 
 <div align="center">
-  <img  src="assets/dashboard.png" alt="Dashboard Screenshot">
+  <img src="https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20screenshot%20of%20modern%20dark%20dashboard%20for%20AI%20bug%20repair%20agent&image_size=landscape_16_9" alt="Dashboard Screenshot">
 </div>
 
 ## Features
@@ -289,6 +289,43 @@ Set environment variables:
 - **API Client**: Direct fetch with TypeScript interfaces.
 - **Styling**: Tailwind CSS with a professional, minimal OpenAI-style theme.
 - **Animations**: Framer Motion for smooth, modern animations.
+
+## Judge Testing Guide
+
+### Sample Run
+- No demo account is required; the app starts with built-in sample data.
+- Use the manual workflow below to verify end-to-end behavior.
+
+### Manual Workflow
+1. Start backend and frontend:
+   ```bash
+   cd self-healing-bug-agent
+   uvicorn healing_agent.app:app --reload --port 8000
+
+   cd ai-repair-dashboard
+   npm run dev
+   ```
+2. Verify service health:
+   ```bash
+   curl http://localhost:8000/health
+   # Expected: {"status":"ok"}
+   ```
+3. Open frontend: http://localhost:8080
+4. Create a repair run:
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/runs \
+     -H "Content-Type: application/json" \
+     -d '{
+       "repo_full_name":"test/repo",
+       "base_sha":"abc1234",
+       "bug_report":"Null pointer exception",
+       "trigger_type":"manual"
+     }'
+   ```
+5. Monitor runs:
+   ```bash
+   curl http://localhost:8000/api/v1/runs
+   ```
 
 ## Codex Usage
 
