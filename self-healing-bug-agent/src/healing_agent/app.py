@@ -37,7 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://localhost:8082", "http://localhost:8081"],
+        allow_origins=["http://localhost:5173", "http://localhost:8080", "http://localhost:8082", "http://localhost:8081"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -90,15 +90,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.run_store.save(run)
         
         # Execute workflow asynchronously
-        asyncio.create_task(execute_workflow(run))
+        asyncio.create_task(execute_workflow(run, app.state.orchestrator, app.state.run_store))
         
         return AcceptedRun(run_id=str(run.id), status=run.status.value)
     
-    async def execute_workflow(run: RepairRun) -> None:
+    async def execute_workflow(
+        run: RepairRun,
+        orchestrator: ClosedLoopOrchestrator,
+        store: InMemoryRunStore,
+    ) -> None:
         """Execute the repair workflow for a given run."""
         try:
-            updated_run = await app.state.orchestrator.execute(run)
-            app.state.run_store.save(updated_run)
+            updated_run = await orchestrator.execute(run)
+            store.save(updated_run)
         except Exception as e:
             # Log error and update run status
             run.add_event(
@@ -106,7 +110,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 f"Workflow execution failed: {str(e)}",
                 {"error_type": type(e).__name__}
             )
-            app.state.run_store.save(run)
+            store.save(run)
 
     @app.get("/api/v1/runs", response_model=list[RepairRun])
     async def list_runs() -> list[RepairRun]:
