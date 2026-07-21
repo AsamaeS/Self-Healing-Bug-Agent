@@ -1,0 +1,25 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "env": {
+    "VITE_API_URL": "@vite_api_url"
+  }
+}
+
+</parameter>
+<parameter=task_progress>
+- [x] Analyze git branches and repository state
+- [x] Stage and commit all changes
+- [x] Push complete project to GitHub
+- [x] Update frontend for production URLs
+- [x] Create GitHub Actions deployment workflow
+- [x] Add frontend deployment configuration
+- [ ] Add backend deployment configuration
+- [ ] Create production .env.example
+- [ ] Test frontend build
+- [ ] Verify deployment and end-to-end functionality
+- [ ] Update README with production URLs
+- [ ] Final verification
+</parameter>
+</write_to_file>
