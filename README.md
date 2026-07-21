@@ -19,7 +19,7 @@
 The Self-Healing Bug Agent is a closed-loop backend that receives a bug report or failed GitHub Actions run, reproduces the failure in a workspace, iterates on a fix, adds a regression test, runs targeted and full verification, and only then allows a pull request to open.
 
 <div align="center">
-  <img src="https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20screenshot%20of%20modern%20dark%20dashboard%20for%20AI%20bug%20repair%20agent&image_size=landscape_16_9" alt="Dashboard Screenshot">
+  <img src="assets/Dashboard.png" alt="Dashboard Screenshot">
 </div>
 
 ## Features
