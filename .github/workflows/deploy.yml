@@ -18,10 +18,10 @@ jobs:
           python-version: '3.11'
       - run: pip install -e '.[dev]'
       - run: pytest tests/
-      - uses: JorgeLNJunior/railway-deploy@v1
+      - uses: railwayapp/railway-action@v1
+        if: secrets.RAILWAY_TOKEN != ''
         with:
           railway-token: ${{ secrets.RAILWAY_TOKEN }}
-          service: self-healing-bug-agent
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -36,6 +36,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - uses: amondnet/vercel-action@v25
+        if: secrets.VERCEL_TOKEN != ''
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
